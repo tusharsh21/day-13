@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Invisibilities</title>
+  <title></title>
   <style>
     *, *:before, *:after {
       margin: 0; 
@@ -53,8 +53,8 @@
       max-width: 600px;
       text-align: center;
     }
-
-    /* Candle CSS – from your snippet adapted */
+    
+    /* Candle CSS – adapted from your snippet */
     .candle-wrapper {
       position: absolute;
       top: 320px;
@@ -165,7 +165,7 @@
         flickr 5s ease-in-out infinite;
       z-index: 4;
       filter: drop-shadow(0 0 10px #fbbf24);
-      opacity: 0; /* initially invisible until lit */
+      opacity: 0; /* Initially invisible until lit */
       transition: opacity 0.3s ease-in-out;
     }
     .candle-lit .candle-flame {
@@ -198,7 +198,7 @@
   </style>
 </head>
 <body>
-  <h1></h1>
+  <h1>🕯️ Invisible Ink</h1>
   <canvas id="puzzleCanvas" width="600" height="400"></canvas>
 
   <!-- Candle HTML -->
@@ -211,7 +211,7 @@
 
   <div id="controls">
     <button id="lightBtn">Fire On</button>
-    <p id="hint">You are smart enough</p>
+    <p id="hint">You are smart Enough</p>
   </div>
 
   <script>
@@ -226,7 +226,7 @@
 
     // Define the paper area on the canvas (white paper)
     const paperArea = { x: 180, y: 60, width: 300, height: 60 };
-    // Updated secret message
+    // Secret message changed as requested:
     const secretMessage = "Muskuraiye aap bahut sundar h";
     let messageRevealed = false;
 
@@ -260,7 +260,7 @@
       candleLit = !candleLit;
       candleWrapper.classList.toggle('candle-lit', candleLit);
       lightBtn.textContent = candleLit ? "Extinguish Candle" : "Light the Candle";
-      if(!candleLit){
+      if (!candleLit) {
         messageRevealed = false;
         drawScene();
       }
@@ -279,7 +279,7 @@
     });
 
     window.addEventListener('pointermove', (e) => {
-      if(!dragging) return;
+      if (!dragging) return;
       let newLeft = e.clientX - offsetX;
       let newTop = e.clientY - offsetY;
 
@@ -292,12 +292,13 @@
       candleWrapper.style.top = newTop + 'px';
 
       // Check if the candle is "under" the paper.
-      // We require that the candle's top is at or below the paper's bottom edge
-      // and that the candle's horizontal center is within the paper's horizontal boundaries.
+      // The requirement here is that the top of the candle's bounding rectangle
+      // must be at or below the paper's bottom edge, and the candle's horizontal
+      // center is within the paper.
       if (candleLit) {
         const candleRect = candleWrapper.getBoundingClientRect();
         const candleCenterX = candleRect.left + candleRect.width / 2;
-        
+
         // Get the paper's bounding rectangle relative to the viewport.
         const canvasRect = canvas.getBoundingClientRect();
         const paperRect = {
@@ -305,7 +306,7 @@
           right: canvasRect.left + paperArea.x + paperArea.width,
           bottom: canvasRect.top + paperArea.y + paperArea.height
         };
-        
+
         if (
           candleRect.top >= paperRect.bottom &&
           candleCenterX >= paperRect.left &&

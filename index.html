@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Invisible Ink Puzzle with Fancy Candle</title>
+  <style>
+    *,*:before,*:after {
+      margin:0; padding:0; box-sizing: border-box;
+    }
+    body {
+      background: #111827;
+      color: #f1f5f9;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      user-select: none;
+    }
+    h1 {
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    #puzzleCanvas {
+      border: 2px solid #94a3b8;
+      border-radius: 8px;
+      background: #1e293b;
+      display: block;
+    }
+    #controls {
+      margin-top: 12px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      font-size: 16px;
+      background-color: #4ade80;
+      color: #0f172a;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+    #hint {
+      margin-top: 10px;
+      color: #facc15;
+      font-size: 14px;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    /* Candle CSS - from your snippet adapted */
+    .frame {
+      position: absolute;
+      /* not used for canvas, so ignoring */
+    }
+    .candle-wrapper {
+      /* wrapper for candle */
+      position: absolute;
+      top: 320px;
+      left: 100px;
+      width: 100px;
+      height: 250px;
+      cursor: grab;
+      user-select: none;
+
+      --border-radius: 3px;
+      --shadow-color: #dcdfe1;
+      --shadow-width: 7px;
+      --melt-drop-color: rgb(195, 192, 192);
+      --melt-drop-animation-time: 30000ms;
+
+      --base-height: 5px;
+      --base-color: #111;
+
+      --candle-from-bottom: var(--base-height);
+      --candle-height: calc(100% - 80px);
+      --candle-width: 50px;
+      --candle-color: #fff;
+
+      --candle-neck-height: 10px;
+      --candle-neck-width: 5px;
+      --candle-neck-color: #111;
+
+      --candle-flame-height: 45px;
+      --candle-flame-width: 30px;
+      --candle-flame-from-bottom: calc(100% + var(--candle-neck-height));
+      --candle-flame-color: yellow;
+      --candle-flame-inner-color: orange;
+      --candle-flame-shadow-color: yellow;
+    }
+    .candle-wrapper::before {
+      content: "";
+      position: absolute;
+      height: var(--base-height);
+      width: 100%;
+      background-color: var(--base-color);
+      bottom: 0;
+      left: 0;
+      border-radius: var(--border-radius);
+      z-index: 0;
+    }
+    .candle {
+      width: var(--candle-width);
+      height: var(--candle-height);
+      background-color: var(--candle-color);
+      position: absolute;
+      bottom: var(--candle-from-bottom);
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: calc(var(--border-radius) * 1.5);
+      box-shadow: -12px 0 0 0 var(--shadow-color) inset;
+      z-index: 2;
+    }
+    .candle::before,
+    .candle::after {
+      content: "";
+      position: absolute;
+      width: var(--shadow-width);
+      border-radius: var(--border-radius);
+      background-color: var(--melt-drop-color);
+      animation: scaleHeightAnim var(--melt-drop-animation-time) linear forwards;
+    }
+    .candle::before {
+      --height: 50px;
+      height: var(--height);
+      top: 0;
+      right: 14px;
+      box-shadow: 6px 3px 1px 2px var(--shadow-color);
+    }
+    .candle::after {
+      --height: 30px;
+      height: var(--height);
+      right: 4px;
+    }
+    @keyframes scaleHeightAnim {
+      0% { height: 0px; }
+      100% { height: var(--height); }
+    }
+    .candle-neck {
+      height: var(--candle-neck-height);
+      width: var(--candle-neck-width);
+      background-color: var(--candle-neck-color);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      border-radius: 1px;
+    }
+    .candle-flame {
+      height: var(--candle-flame-height);
+      width: var(--candle-flame-width);
+      position: absolute;
+      bottom: var(--candle-flame-from-bottom);
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--candle-flame-color);
+      border-width: 32px 13px 0px 13px;
+      border-radius: 15px 15px 15px 15px / 35px 35px 15px 15px;
+      border-color: #ffe50a;
+      border-style: solid;
+      transform-origin: 50% 100%;
+      animation: wind 15s ease-in-out infinite, size 20s ease-in-out infinite,
+        flickr 5s ease-in-out infinite;
+      z-index: 4;
+      filter: drop-shadow(0 0 10px #fbbf24);
+      opacity: 0; /* initially invisible until lit */
+      transition: opacity 0.3s ease-in-out;
+    }
+    .candle-lit .candle-flame {
+      opacity: 1;
+    }
+    @keyframes wind {
+      0%, 22%, 49%, 62%, 81%, 100% {
+        border-radius: 6px 22px 15px 15px/ 35px 35px 15px 15px;
+      }
+      14%, 32%, 56%, 70%, 89% {
+        border-radius: 28px 6px 15px 15px/ 35px 35px 15px 15px;
+      }
+    }
+    @keyframes size {
+      0%, 22%, 49%, 62%, 81%, 100% {
+        transform: scale(1, 1);
+      }
+      14%, 32%, 56%, 70%, 89% {
+        transform: scale(0.9, 1.2);
+      }
+    }
+    @keyframes flickr {
+      0%, 22%, 49%, 62%, 81%, 100% {
+        box-shadow: 0 0 30px 0 rgba(255, 202, 0, 0.7);
+      }
+      14%, 32%, 56%, 70%, 89% {
+        box-shadow: 0 0 40px 0 rgba(255, 202, 0, 0.8);
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <h1>🕯️ Invisible Ink</h1>
+  <canvas id="puzzleCanvas" width="600" height="400"></canvas>
+
+  <!-- Candle HTML -->
+  <div id="candle" class="candle-wrapper" style="touch-action:none;">
+    <div class="candle">
+      <div class="candle-neck"></div>
+      <div class="candle-flame"></div>
+    </div>
+  </div>
+
+  <div id="controls">
+    <button id="lightBtn">Light the Candle</button>
+    <p id="hint">Drag the lit candle under the paper to reveal a secret just for you 🕯️</p>
+  </div>
+
+<script>
+  const canvas = document.getElementById('puzzleCanvas');
+  const ctx = canvas.getContext('2d');
+  const candleWrapper = document.getElementById('candle');
+  const flame = candleWrapper.querySelector('.candle-flame');
+  const lightBtn = document.getElementById('lightBtn');
+
+  let candleLit = false;
+  let dragging = false;
+  let offsetX, offsetY;
+
+  // Paper area on canvas
+  const paperArea = { x: 180, y: 60, width: 300, height: 60 };
+  const secretMessage = "You're the spark in my everyday 🔥";
+  let messageRevealed = false;
+
+  function drawScene() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw paper rectangle
+    ctx.fillStyle = '#d3d3d380'; // translucent paper
+    ctx.fillRect(paperArea.x, paperArea.y, paperArea.width, paperArea.height);
+
+    // Draw invisible ink text (same as paper bg color)
+    ctx.font = '28px Arial';
+    ctx.fillStyle = '#d3d3d3'; // almost invisible
+    ctx.fillText(secretMessage, paperArea.x + 10, paperArea.y + 40);
+
+    // If revealed, draw text with normal color on top
+    if(messageRevealed) {
+      ctx.fillStyle = '#facc15'; // bright yellow
+      ctx.fillText(secretMessage, paperArea.x + 10, paperArea.y + 40);
+    }
+  }
+
+  drawScene();
+
+  // Toggle candle flame visibility
+  lightBtn.addEventListener('click', () => {
+    candleLit = !candleLit;
+    candleWrapper.classList.toggle('candle-lit', candleLit);
+    lightBtn.textContent = candleLit ? "Extinguish Candle" : "Light the Candle";
+
+    // If candle extinguished, also hide message again
+    if(!candleLit){
+      messageRevealed = false;
+      drawScene();
+    }
+  });
+
+  // Make candle draggable on desktop + touch devices
+  candleWrapper.style.position = 'absolute';
+
+  candleWrapper.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    dragging = true;
+    candleWrapper.style.cursor = 'grabbing';
+
+    const rect = candleWrapper.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+  });
+
+  window.addEventListener('pointermove', (e) => {
+    if(!dragging) return;
+
+    let newLeft = e.clientX - offsetX;
+    let newTop = e.clientY - offsetY;
+
+    // Keep candle inside viewport boundaries
+    const maxLeft = window.innerWidth - candleWrapper.offsetWidth;
+    const maxTop = window.innerHeight - candleWrapper.offsetHeight;
+
+    if(newLeft < 0) newLeft = 0;
+    else if(newLeft > maxLeft) newLeft = maxLeft;
+
+    if(newTop < 0) newTop = 0;
+    else if(newTop > maxTop) newTop = maxTop;
+
+    candleWrapper.style.left = newLeft + 'px';
+    candleWrapper.style.top = newTop + 'px';
+
+    // Check if candle is "under" the paper on canvas
+    if(candleLit) {
+      const candleCenterX = newLeft + candleWrapper.offsetWidth / 2;
+      const candleBottomY = newTop + candleWrapper.offsetHeight;
+
+      // Convert candle position to canvas coordinates (canvas is fixed at center)
+      const canvasRect = canvas.getBoundingClientRect();
+
+      // Candle "under" paper if candleCenterX inside paperArea.x->x+width
+      // and candleBottomY near paperArea.y+height (the candle flame is just above candle bottom)
+      if(
+        candleCenterX >= canvasRect.left + paperArea.x &&
+        candleCenterX <= canvasRect.left + paperArea.x + paperArea.width &&
+        candleBottomY >= canvasRect.top + paperArea.y + paperArea.height - 40 &&
+        candleBottomY <= canvasRect.top + paperArea.y + paperArea.height + 40
+      ) {
+        if(!messageRevealed){
+          messageRevealed = true;
+          drawScene();
+        }
+      } else {
+        if(messageRevealed) {
+          messageRevealed = false;
+          drawScene();
+        }
+      }
+    }
+  });
+
+  window.addEventListener('pointerup', (e) => {
+    dragging = false;
+    candleWrapper.style.cursor = 'grab';
+  });
+
+</script>
+</body>
+</html>

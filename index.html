@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Day - 13</title>
+  <title>Invisibilities</title>
   <style>
     *, *:before, *:after {
       margin: 0; 
@@ -198,7 +198,7 @@
   </style>
 </head>
 <body>
-  <h1>🕯️ Invisible Ink</h1>
+  <h1></h1>
   <canvas id="puzzleCanvas" width="600" height="400"></canvas>
 
   <!-- Candle HTML -->
@@ -210,8 +210,8 @@
   </div>
 
   <div id="controls">
-    <button id="lightBtn">Fireup</button>
-    <p id="hint"> You are Smart Enough </p>
+    <button id="lightBtn">Fire On</button>
+    <p id="hint">You are smart enough</p>
   </div>
 
   <script>
@@ -226,6 +226,7 @@
 
     // Define the paper area on the canvas (white paper)
     const paperArea = { x: 180, y: 60, width: 300, height: 60 };
+    // Updated secret message
     const secretMessage = "Muskuraiye aap bahut sundar h";
     let messageRevealed = false;
 
@@ -240,7 +241,7 @@
       ctx.strokeRect(paperArea.x, paperArea.y, paperArea.width, paperArea.height);
       ctx.setLineDash([]);
 
-      // Draw the secret message (in black) if revealed
+      // Only draw the secret message if it is to be revealed.
       if (messageRevealed) {
         ctx.fillStyle = 'black';
         ctx.font = '24px serif';
@@ -249,12 +250,6 @@
         let textX = paperArea.x + (paperArea.width - textWidth) / 2;
         let textY = paperArea.y + paperArea.height / 2;
         ctx.fillText(secretMessage, textX, textY);
-      } else {
-        // Otherwise show a faint invisible ink text (optional)
-        ctx.fillStyle = '#d3d3d3';
-        ctx.font = '24px serif';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(secretMessage, paperArea.x + 10, paperArea.y + paperArea.height / 2);
       }
     }
 
@@ -271,7 +266,7 @@
       }
     });
 
-    // Make the candle draggable (works on pointer events)
+    // Make the candle draggable (using pointer events)
     candleWrapper.style.position = 'absolute';
 
     candleWrapper.addEventListener('pointerdown', (e) => {
@@ -291,34 +286,30 @@
       // Keep candle inside viewport boundaries
       const maxLeft = window.innerWidth - candleWrapper.offsetWidth;
       const maxTop = window.innerHeight - candleWrapper.offsetHeight;
-
       newLeft = Math.max(0, Math.min(newLeft, maxLeft));
       newTop = Math.max(0, Math.min(newTop, maxTop));
-
       candleWrapper.style.left = newLeft + 'px';
       candleWrapper.style.top = newTop + 'px';
 
-      // Check if the candle is "under" the paper
+      // Check if the candle is "under" the paper.
+      // We require that the candle's top is at or below the paper's bottom edge
+      // and that the candle's horizontal center is within the paper's horizontal boundaries.
       if (candleLit) {
         const candleRect = candleWrapper.getBoundingClientRect();
-        // Calculate the candle's horizontal center
         const candleCenterX = candleRect.left + candleRect.width / 2;
         
-        // Determine the paper's rectangle relative to the viewport
+        // Get the paper's bounding rectangle relative to the viewport.
         const canvasRect = canvas.getBoundingClientRect();
         const paperRect = {
           left: canvasRect.left + paperArea.x,
           right: canvasRect.left + paperArea.x + paperArea.width,
-          top: canvasRect.top + paperArea.y,
           bottom: canvasRect.top + paperArea.y + paperArea.height
         };
         
-        // Only reveal the secret if the candle's horizontal center lies within the paper,
-        // and the top edge of the candle (indicating it's placed below the paper) is at or below the paper's bottom.
         if (
+          candleRect.top >= paperRect.bottom &&
           candleCenterX >= paperRect.left &&
-          candleCenterX <= paperRect.right &&
-          candleRect.top >= paperRect.bottom
+          candleCenterX <= paperRect.right
         ) {
           if (!messageRevealed) {
             messageRevealed = true;

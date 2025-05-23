@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Invisible Ink Puzzle with Fancy Candle</title>
+  <title>Day - 13</title>
   <style>
-    *,*:before,*:after {
-      margin:0; padding:0; box-sizing: border-box;
+    *, *:before, *:after {
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box;
     }
     body {
       background: #111827;
@@ -18,6 +20,7 @@
       justify-content: center;
       height: 100vh;
       user-select: none;
+      position: relative;
     }
     h1 {
       margin-bottom: 10px;
@@ -51,13 +54,8 @@
       text-align: center;
     }
 
-    /* Candle CSS - from your snippet adapted */
-    .frame {
-      position: absolute;
-      /* not used for canvas, so ignoring */
-    }
+    /* Candle CSS – from your snippet adapted */
     .candle-wrapper {
-      /* wrapper for candle */
       position: absolute;
       top: 320px;
       left: 100px;
@@ -65,25 +63,25 @@
       height: 250px;
       cursor: grab;
       user-select: none;
-
+      
       --border-radius: 3px;
       --shadow-color: #dcdfe1;
       --shadow-width: 7px;
       --melt-drop-color: rgb(195, 192, 192);
       --melt-drop-animation-time: 30000ms;
-
+      
       --base-height: 5px;
       --base-color: #111;
-
+      
       --candle-from-bottom: var(--base-height);
       --candle-height: calc(100% - 80px);
       --candle-width: 50px;
       --candle-color: #fff;
-
+      
       --candle-neck-height: 10px;
       --candle-neck-width: 5px;
       --candle-neck-color: #111;
-
+      
       --candle-flame-height: 45px;
       --candle-flame-width: 30px;
       --candle-flame-from-bottom: calc(100% + var(--candle-neck-height));
@@ -197,7 +195,6 @@
         box-shadow: 0 0 40px 0 rgba(255, 202, 0, 0.8);
       }
     }
-
   </style>
 </head>
 <body>
@@ -213,126 +210,133 @@
   </div>
 
   <div id="controls">
-    <button id="lightBtn">Light the Candle</button>
-    <p id="hint">Drag the lit candle under the paper to reveal a secret just for you 🕯️</p>
+    <button id="lightBtn">Fireup</button>
+    <p id="hint"> You are Smart Enough </p>
   </div>
 
-<script>
-  const canvas = document.getElementById('puzzleCanvas');
-  const ctx = canvas.getContext('2d');
-  const candleWrapper = document.getElementById('candle');
-  const flame = candleWrapper.querySelector('.candle-flame');
-  const lightBtn = document.getElementById('lightBtn');
+  <script>
+    const canvas = document.getElementById('puzzleCanvas');
+    const ctx = canvas.getContext('2d');
+    const candleWrapper = document.getElementById('candle');
+    const lightBtn = document.getElementById('lightBtn');
 
-  let candleLit = false;
-  let dragging = false;
-  let offsetX, offsetY;
+    let candleLit = false;
+    let dragging = false;
+    let offsetX, offsetY;
 
-  // Paper area on canvas
-  const paperArea = { x: 180, y: 60, width: 300, height: 60 };
-  const secretMessage = "You're the spark in my everyday 🔥";
-  let messageRevealed = false;
+    // Define the paper area on the canvas (white paper)
+    const paperArea = { x: 180, y: 60, width: 300, height: 60 };
+    const secretMessage = "Muskuraiye aap bahut sundar h";
+    let messageRevealed = false;
 
-  function drawScene() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    function drawScene() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw paper rectangle
-    ctx.fillStyle = '#d3d3d380'; // translucent paper
-    ctx.fillRect(paperArea.x, paperArea.y, paperArea.width, paperArea.height);
+      // Draw the white paper
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(paperArea.x, paperArea.y, paperArea.width, paperArea.height);
+      ctx.strokeStyle = '#94a3b8';
+      ctx.setLineDash([4, 4]);
+      ctx.strokeRect(paperArea.x, paperArea.y, paperArea.width, paperArea.height);
+      ctx.setLineDash([]);
 
-    // Draw invisible ink text (same as paper bg color)
-    ctx.font = '28px Arial';
-    ctx.fillStyle = '#d3d3d3'; // almost invisible
-    ctx.fillText(secretMessage, paperArea.x + 10, paperArea.y + 40);
-
-    // If revealed, draw text with normal color on top
-    if(messageRevealed) {
-      ctx.fillStyle = '#facc15'; // bright yellow
-      ctx.fillText(secretMessage, paperArea.x + 10, paperArea.y + 40);
-    }
-  }
-
-  drawScene();
-
-  // Toggle candle flame visibility
-  lightBtn.addEventListener('click', () => {
-    candleLit = !candleLit;
-    candleWrapper.classList.toggle('candle-lit', candleLit);
-    lightBtn.textContent = candleLit ? "Extinguish Candle" : "Light the Candle";
-
-    // If candle extinguished, also hide message again
-    if(!candleLit){
-      messageRevealed = false;
-      drawScene();
-    }
-  });
-
-  // Make candle draggable on desktop + touch devices
-  candleWrapper.style.position = 'absolute';
-
-  candleWrapper.addEventListener('pointerdown', (e) => {
-    e.preventDefault();
-    dragging = true;
-    candleWrapper.style.cursor = 'grabbing';
-
-    const rect = candleWrapper.getBoundingClientRect();
-    offsetX = e.clientX - rect.left;
-    offsetY = e.clientY - rect.top;
-  });
-
-  window.addEventListener('pointermove', (e) => {
-    if(!dragging) return;
-
-    let newLeft = e.clientX - offsetX;
-    let newTop = e.clientY - offsetY;
-
-    // Keep candle inside viewport boundaries
-    const maxLeft = window.innerWidth - candleWrapper.offsetWidth;
-    const maxTop = window.innerHeight - candleWrapper.offsetHeight;
-
-    if(newLeft < 0) newLeft = 0;
-    else if(newLeft > maxLeft) newLeft = maxLeft;
-
-    if(newTop < 0) newTop = 0;
-    else if(newTop > maxTop) newTop = maxTop;
-
-    candleWrapper.style.left = newLeft + 'px';
-    candleWrapper.style.top = newTop + 'px';
-
-    // Check if candle is "under" the paper on canvas
-    if(candleLit) {
-      const candleCenterX = newLeft + candleWrapper.offsetWidth / 2;
-      const candleBottomY = newTop + candleWrapper.offsetHeight;
-
-      // Convert candle position to canvas coordinates (canvas is fixed at center)
-      const canvasRect = canvas.getBoundingClientRect();
-
-      // Candle "under" paper if candleCenterX inside paperArea.x->x+width
-      // and candleBottomY near paperArea.y+height (the candle flame is just above candle bottom)
-      if(
-        candleCenterX >= canvasRect.left + paperArea.x &&
-        candleCenterX <= canvasRect.left + paperArea.x + paperArea.width &&
-        candleBottomY >= canvasRect.top + paperArea.y + paperArea.height - 40 &&
-        candleBottomY <= canvasRect.top + paperArea.y + paperArea.height + 40
-      ) {
-        if(!messageRevealed){
-          messageRevealed = true;
-          drawScene();
-        }
+      // Draw the secret message (in black) if revealed
+      if (messageRevealed) {
+        ctx.fillStyle = 'black';
+        ctx.font = '24px serif';
+        ctx.textBaseline = 'middle';
+        let textWidth = ctx.measureText(secretMessage).width;
+        let textX = paperArea.x + (paperArea.width - textWidth) / 2;
+        let textY = paperArea.y + paperArea.height / 2;
+        ctx.fillText(secretMessage, textX, textY);
       } else {
-        if(messageRevealed) {
-          messageRevealed = false;
-          drawScene();
-        }
+        // Otherwise show a faint invisible ink text (optional)
+        ctx.fillStyle = '#d3d3d3';
+        ctx.font = '24px serif';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(secretMessage, paperArea.x + 10, paperArea.y + paperArea.height / 2);
       }
     }
-  });
 
-  window.addEventListener('pointerup', (e) => {
-    dragging = false;
-    candleWrapper.style.cursor = 'grab';
-  });
+    drawScene();
 
-</script>
+    // Toggle the candle flame via the button
+    lightBtn.addEventListener('click', () => {
+      candleLit = !candleLit;
+      candleWrapper.classList.toggle('candle-lit', candleLit);
+      lightBtn.textContent = candleLit ? "Extinguish Candle" : "Light the Candle";
+      if(!candleLit){
+        messageRevealed = false;
+        drawScene();
+      }
+    });
+
+    // Make the candle draggable (works on pointer events)
+    candleWrapper.style.position = 'absolute';
+
+    candleWrapper.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      dragging = true;
+      candleWrapper.style.cursor = 'grabbing';
+      const rect = candleWrapper.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if(!dragging) return;
+      let newLeft = e.clientX - offsetX;
+      let newTop = e.clientY - offsetY;
+
+      // Keep candle inside viewport boundaries
+      const maxLeft = window.innerWidth - candleWrapper.offsetWidth;
+      const maxTop = window.innerHeight - candleWrapper.offsetHeight;
+
+      newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+      newTop = Math.max(0, Math.min(newTop, maxTop));
+
+      candleWrapper.style.left = newLeft + 'px';
+      candleWrapper.style.top = newTop + 'px';
+
+      // Check if the candle is "under" the paper
+      if (candleLit) {
+        const candleRect = candleWrapper.getBoundingClientRect();
+        // Calculate the candle's horizontal center
+        const candleCenterX = candleRect.left + candleRect.width / 2;
+        
+        // Determine the paper's rectangle relative to the viewport
+        const canvasRect = canvas.getBoundingClientRect();
+        const paperRect = {
+          left: canvasRect.left + paperArea.x,
+          right: canvasRect.left + paperArea.x + paperArea.width,
+          top: canvasRect.top + paperArea.y,
+          bottom: canvasRect.top + paperArea.y + paperArea.height
+        };
+        
+        // Only reveal the secret if the candle's horizontal center lies within the paper,
+        // and the top edge of the candle (indicating it's placed below the paper) is at or below the paper's bottom.
+        if (
+          candleCenterX >= paperRect.left &&
+          candleCenterX <= paperRect.right &&
+          candleRect.top >= paperRect.bottom
+        ) {
+          if (!messageRevealed) {
+            messageRevealed = true;
+            drawScene();
+          }
+        } else {
+          if (messageRevealed) {
+            messageRevealed = false;
+            drawScene();
+          }
+        }
+      }
+    });
+
+    window.addEventListener('pointerup', () => {
+      dragging = false;
+      candleWrapper.style.cursor = 'grab';
+    });
+  </script>
 </body>
 </html>
